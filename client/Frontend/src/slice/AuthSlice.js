@@ -5,6 +5,7 @@ const initialState = {
     isAuthenticated: false,
     isloading: true,
     user: null,
+    token: null
 }
 
 export const registerUser = createAsyncThunk(
@@ -60,33 +61,62 @@ export const LogoutUser = createAsyncThunk(
         }
     }
 );
+// export const checkAuth = createAsyncThunk(
+//     '/auth/checkauth',
+//     async (_,{ rejectWithValue }) => {
+//         try {
+//             const response = await axios.get(
+//                 `${import.meta.env.VITE_API_URL}/api/checkauth`,
+//                 {
+//                     withCredentials: true,
+//                     headers: {
+//                         'Cache-Control': 'no-store,no-cache,must-revalidate, proxy-revalidate'
+//                     }
+//                 }
+//             );
+//             return response.data;
+//         } catch (error) {
+//             return rejectWithValue(
+//                 error.response?.data?.message || 'Unauthorized user!'
+//             );
+//         }
+//     }
+// );
+
+
 export const checkAuth = createAsyncThunk(
-    '/auth/checkauth',
-    async (_,{ rejectWithValue }) => {
-        try {
-            const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/checkauth`,
-                {
-                    withCredentials: true,
-                    headers: {
-                        'Cache-Control': 'no-store,no-cache,must-revalidate, proxy-revalidate'
+        '/auth/checkauth',
+        async (token,{ rejectWithValue }) => {
+            try {
+                const response = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/api/checkauth`,
+                    {
+                        withCredentials: true,
+                        headers: {
+                            Authorization : `Bearer ${token}`,
+                            'Cache-Control': 'no-store,no-cache,must-revalidate, proxy-revalidate'
+                        }
                     }
-                }
-            );
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.message || 'Unauthorized user!'
-            );
+                );
+                return response.data;
+            } catch (error) {
+                return rejectWithValue(
+                    error.response?.data?.message || 'Unauthorized user!'
+                );
+            }
         }
-    }
-);
+    );
 
 const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
         setUser: (state, action) => { },
+        resetTokenAndCredentials : (state)=> {
+            state.isAuthenticated = false;
+            state.user = null
+            state.token = null
+        }
     },
     extraReducers: (builder) => {
         builder.addCase(registerUser.pending, (state) => {
@@ -112,12 +142,15 @@ const authSlice = createSlice({
                 state.isloading = false;
                 state.user = action.payload.success ? action.payload.user : null;
                 state.isAuthenticated = action.payload.success;
+                state.token = action.payload.token
+                sessionStorage.setItem('token', JSON.stringify(action.payload.token))
             })
             .addCase(LoginUser.rejected, (state, action) => {
 
                 state.isloading = false;
                 state.user = null;
                 state.isAuthenticated = false;
+                state.token = null
             })
         builder.addCase(checkAuth.pending, (state) => {
             state.isloading = true
@@ -143,5 +176,5 @@ const authSlice = createSlice({
     }
 })
 
-export const { setUser } = authSlice.actions;
+export const { setUser, resetTokenAndCredentials } = authSlice.actions;
 export default authSlice.reducer

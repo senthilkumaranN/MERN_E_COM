@@ -8,7 +8,7 @@ import { ShoppingViewHeaderMenuItems } from '@/config'
 import { DropdownMenuTrigger, DropdownMenu, DropdownMenuContent } from '../ui/dropdown-menu'
 import { AvatarFallback, Avatar } from '../ui/avatar'
 import { DropdownMenuLabel, DropdownMenuSeparator } from '../ui/dropdown-menu'
-import { LogoutUser } from '@/slice/AuthSlice'
+import { LogoutUser, resetTokenAndCredentials } from '@/slice/AuthSlice'
 import ShoppingCartWrapper from './cart-wrapper'
 import { fetchToCart } from '@/slice/cart/Slice'
 import { Label } from '../ui/label'
@@ -55,7 +55,10 @@ function HeaderRightContent() {
   const dispatch = useDispatch()
 
   function handleLogout() {
-    dispatch(LogoutUser())
+    // dispatch(LogoutUser())
+    dispatch(resetTokenAndCredentials())
+    sessionStorage.clear()
+    navigate('/auth/login')
   }
 
   useEffect(() => {
