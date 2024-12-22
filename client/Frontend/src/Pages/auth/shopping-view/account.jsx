@@ -8,7 +8,7 @@ import ShoppingOrders from "@/components/shopping-view/Orders";
 const ShoppingAccount = () => {
   return (
     <div className='flex flex-col'>
-      <div className='realtive h-[350px] w-full overflow-hidden'>
+      <div className='relative h-[350px] w-full overflow-hidden'>
         <img
           src={accImg}
           width={'1600'}
